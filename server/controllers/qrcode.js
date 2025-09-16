@@ -1,6 +1,6 @@
 const QRCode = require("qrcode");
 const validator = require("validator");
-const prisma = require('../config/prisma')
+const prisma = require("../config/prisma");
 
 exports.changeToQrcode = async (req, res) => {
   try {
@@ -15,18 +15,32 @@ exports.changeToQrcode = async (req, res) => {
         message: "Invalid URL format",
       });
     }
+
+    const checkUrl = await prisma.url.findFirst({
+      where: {
+        url: url,
+      },
+    });
+
     const genQrCode = await QRCode.toDataURL(url);
-    
-    console.log(genQrCode)
-
-    await prisma.url.create({
-      data:{
-        url:url,
-        qrcode:genQrCode
-      }
-    })
-
-    res.json({
+    if (checkUrl) {
+      await prisma.url.update({
+        where: {
+          id: checkUrl.id,
+        },
+        data: {
+          qrcode: genQrCode,
+        },
+      });
+    } else {
+      await prisma.url.create({
+        data: {
+          url,
+          qrcode: genQrCode,
+        },
+      });
+    }
+    return res.json({
       qrcode: genQrCode,
     });
   } catch (err) {
@@ -36,3 +50,28 @@ exports.changeToQrcode = async (req, res) => {
     });
   }
 };
+
+exports.getQrcode = async (req, res) => {
+  try {
+    const getQR = await prisma.url.findMany({
+      take: 10,
+      skip: 0,
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    console.log("QRcode ", getQR);
+    res.status(200).json({
+      data: getQR,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Server Error",
+    });
+  }
+};
+
+// docker-compose down
+// docker-compose up --build -d

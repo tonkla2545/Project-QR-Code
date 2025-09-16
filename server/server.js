@@ -12,9 +12,12 @@ app.get('/',(rea,res)=>{
 // readdirSync('./routes').map((item) => 
 //     app.use('/api').require('./routes/'+item))
 
-const qrcode = require('./routes/qrcode')
+// const qrcode = require('./routes/qrcode')
 
-app.use('/api', qrcode)
+// app.use('/api', qrcode)
+
+readdirSync('./routes').map((item)=> 
+    app.use('/api',require('./routes/'+item))) // map is loop
 
 app.listen(4000,()=>{
     console.log('Server running')
