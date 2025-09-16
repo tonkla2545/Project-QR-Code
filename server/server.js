@@ -16,6 +16,6 @@ const qrcode = require('./routes/qrcode')
 
 app.use('/api', qrcode)
 
-app.listen(5001,()=>{
+app.listen(4000,()=>{
     console.log('Server running')
 })
