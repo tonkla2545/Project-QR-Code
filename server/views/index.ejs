@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QR Code Generator</title>
+</head>
+<body>
+  <h1>Generate QR Code</h1>
+
+  <!-- Form -->
+  <form id="qrForm">
+    <input type="text" id="urlInput" placeholder="Enter URL" required />
+    <button type="submit">Generate</button>
+  </form>
+
+  <div id="result" style="margin-top:20px;">
+    <h3>QR Code:</h3>
+    <img id="qrImage" src="" alt="QR Code will appear here" style="max-width:200px;" />
+  </div>
+
+  <script>
+    const form = document.getElementById('qrForm');
+    const input = document.getElementById('urlInput');
+    const qrImage = document.getElementById('qrImage');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const url = input.value;
+
+      try {
+        const res = await fetch('/api/changeToQrcode', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ url })
+        });
+
+        const data = await res.json();
+
+        if (data.qrcode) {
+          qrImage.src = data.qrcode; // base64 จาก API
+        } else {
+          alert(data.message || 'Error generating QR code');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Server error');
+      }
+    });
+  </script>
+</body>
+</html>
