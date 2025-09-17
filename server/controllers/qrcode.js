@@ -69,7 +69,7 @@ exports.getQrcode = async (req, res) => {
       },
     });
 
-    console.log("QRcode ", getQR);
+    // console.log("QRcode ", getQR);
     res.status(200).json({
       data: getQR,
     });

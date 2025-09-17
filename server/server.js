@@ -2,6 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 const express = require("express");
 const { readdirSync } = require("fs");
 const cron = require("node-cron");
+const path = require("path");
 
 const app = express();
 const prisma = new PrismaClient();
@@ -9,16 +10,13 @@ const prisma = new PrismaClient();
 app.use(express.json()); // สำหรับ JSON body
 app.use(express.urlencoded({ extended: true })); // สำหรับ form-urlencoded
 
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 app.get("/", (rea, res) => {
   res.send("hello tonkla");
+  // res.render('index'); 
 });
 
-// readdirSync('./routes').map((item) =>
-//     app.use('/api').require('./routes/'+item))
-
-// const qrcode = require('./routes/qrcode')
-
-// app.use('/api', qrcode)
 
 cron.schedule("0 * * * *", async () => {
   // รันทุกชั่วโมง
@@ -37,6 +35,9 @@ cron.schedule("0 * * * *", async () => {
 readdirSync("./routes").map((item) =>
   app.use("/api", require("./routes/" + item))
 ); // map is loop
+// const qrcode = require('./routes/qrcode')
+
+// app.use('/api', qrcode)
 
 app.listen(4000, () => {
   console.log("Server running");

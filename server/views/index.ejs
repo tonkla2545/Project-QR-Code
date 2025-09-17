@@ -1,21 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>QR Code Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #fff;
+      margin-top: 50px;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #1f2937;
+    }
+
+    form {
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      outline: none;
+      transition: border 0.2s;
+    }
+
+    input:focus {
+      border: 1px solid #3b82f6;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #3b82f6;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #2563eb;
+    }
+
+    #result, #allQrs {
+      margin-top: 20px;
+    }
+
+    #qrImage {
+      margin-top: 10px;
+      border: 1px solid #e5e7eb;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f9fafb;
+    }
+
+    #allQrs div {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    #allQrs p {
+      margin: 5px 0;
+      font-size: 14px;
+      color: #374151;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>Generate QR Code</h1>
+  <div class="container">
+    <h1>QR Code Generator</h1>
 
-  <!-- Form -->
-  <form id="qrForm">
-    <input type="text" id="urlInput" placeholder="Enter URL" required />
-    <button type="submit">Generate</button>
-  </form>
+    <!-- Form -->
+    <form id="qrForm">
+      <input type="text" id="urlInput" placeholder="Enter URL" required />
+      <button type="submit">Generate</button>
+    </form>
 
-  <div id="result" style="margin-top:20px;">
-    <h3>QR Code:</h3>
-    <img id="qrImage" src="" alt="QR Code will appear here" style="max-width:200px;" />
+    <div id="result">
+      <h3>QR Code:</h3>
+      <img id="qrImage" src="" alt="QR Code will appear here" style="max-width:200px;" />
+    </div>
+
+    <div>
+      <button id="loadAll" style="margin-top:20px;">Load All QRCodes</button>
+      <div id="allQrs"></div>
+    </div>
   </div>
 
   <script>
@@ -31,9 +127,7 @@
       try {
         const res = await fetch('/api/changeToQrcode', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ url })
         });
 
@@ -49,6 +143,35 @@
         alert('Server error');
       }
     });
+
+    const loadAllBtn = document.getElementById('loadAll');
+    const allQrsDiv = document.getElementById('allQrs');
+
+    loadAllBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/getQrcode');
+        const data = await res.json();
+
+        allQrsDiv.innerHTML = "";
+
+        if (data.data && data.data.length > 0) {
+          data.data.forEach(item => {
+            const wrapper = document.createElement("div");
+            wrapper.innerHTML = `
+              <p><b>URL:</b> ${item.url}</p>
+              <img src="${item.qrcode}" alt="QR Code" style="max-width:150px;" />
+            `;
+            allQrsDiv.appendChild(wrapper);
+          });
+        } else {
+          allQrsDiv.innerHTML = "<p>No QR Codes found</p>";
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error fetching QR Codes");
+      }
+    });
   </script>
 </body>
+
 </html>
