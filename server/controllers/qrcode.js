@@ -30,6 +30,7 @@ exports.changeToQrcode = async (req, res) => {
         },
         data: {
           qrcode: genQrCode,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 วัน
         },
       });
     } else {
@@ -37,6 +38,7 @@ exports.changeToQrcode = async (req, res) => {
         data: {
           url,
           qrcode: genQrCode,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 วัน
         },
       });
     }
@@ -54,6 +56,12 @@ exports.changeToQrcode = async (req, res) => {
 exports.getQrcode = async (req, res) => {
   try {
     const getQR = await prisma.url.findMany({
+      where: {
+        OR: [
+          { expiresAt: null }, // ไม่มีวันหมดอายุ
+          { expiresAt: { gt: new Date() } }, // ยังไม่หมดอายุ
+        ],
+      },
       take: 10,
       skip: 0,
       orderBy: {

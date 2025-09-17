@@ -19,5 +19,5 @@ model Url {
   url       String
   qrcode    String   @db.Text
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  expiresAt DateTime?
 }
